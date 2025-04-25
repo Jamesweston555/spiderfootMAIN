@@ -3,6 +3,7 @@ FROM python:3.9-slim
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     git \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Clone SpiderFoot
@@ -34,9 +35,18 @@ RUN echo "api_key=spiderfoot123" >> /spiderfoot/spiderfoot.cfg
 RUN echo "api_local_cert=" >> /spiderfoot/spiderfoot.cfg
 RUN echo "api_timeout=120" >> /spiderfoot/spiderfoot.cfg
 
+# Create startup script
+RUN echo '#!/bin/bash\n\
+python /spiderfoot/sf.py -l 0.0.0.0:5000 & \
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload' > /start.sh && \
+chmod +x /start.sh
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/docs || exit 1
+
 # Expose ports
 EXPOSE 5000 5001 8000
 
-# Start both services
-CMD python /spiderfoot/sf.py -l 0.0.0.0:5000 & \
-    uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload 
+# Start services
+CMD ["/start.sh"] 
