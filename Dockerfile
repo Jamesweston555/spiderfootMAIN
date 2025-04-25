@@ -1,4 +1,6 @@
-FROM python:3.9-slim
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9
+
+COPY app.py /app/main.py
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
