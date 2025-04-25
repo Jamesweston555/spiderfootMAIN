@@ -29,5 +29,5 @@ COPY spiderfoot_api /app/spiderfoot_api
 EXPOSE 8000
 
 # Start both services
-CMD python /spiderfoot/sf.py -l 127.0.0.1:5001 -q & \
-    uvicorn spiderfoot_api.app.main:app --host 0.0.0.0 --port 8000 
+CMD cd /spiderfoot && python sf.py -l 127.0.0.1:5001 & \
+    cd /app && uvicorn spiderfoot_api.app.main:app --host 0.0.0.0 --port 8000 
